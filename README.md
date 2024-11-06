@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Financial Projections Web App
 
-## Getting Started
+## Overview
+A small business financial projections web application built with Next.js, TypeScript, and SQLite.
 
-First, run the development server:
+## Features
+- User Authentication
+- Expense and Revenue Tracking
+- Financial Projections Dashboard
+- Type Management for Expenses and Revenues
 
+## Prerequisites
+- Node.js (v18 or later)
+- npm
+
+## Installation
+
+1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/yourusername/financial-projections.git
+cd financial-projections
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Set up environment variables
+Create a `.env.local` file in the project root with the following:
+```
+JWT_SECRET=your_very_long_and_secure_random_secret
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Running the Application
 
-## Learn More
+### Development Mode
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+### Production Build
+```bash
+npm run build
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Vercel
+1. Install Vercel CLI
+```bash
+npm install -g vercel
+```
 
-## Deploy on Vercel
+2. Deploy
+```bash
+vercel
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Other Platforms
+- Ensure Node.js is supported
+- Set environment variables
+- Use `npm run build` and `npm start`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Database
+- SQLite is used for data persistence
+- Database is automatically created and migrated on first run
+- Located at `financial-projections.db` in the project root
+
+## Security
+- Passwords are hashed using bcrypt
+- JWT used for authentication
+- Middleware protects routes
+
+## Technologies
+- Next.js 13
+- TypeScript
+- SQLite
+- Tailwind CSS
+- JWT Authentication
+- Bcrypt
+
+## License
+MIT License
