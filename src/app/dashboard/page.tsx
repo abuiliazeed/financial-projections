@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -30,6 +30,36 @@ export default function Dashboard() {
     type: string
     amount: number
   }[]>([])
+
+  // Compute monthly totals
+  const monthlyTotals = useMemo(() => {
+    const totals: { [key: string]: { expenses: number, revenues: number, netProfit: number } } = {}
+
+    // Calculate expense totals
+    expenses.forEach(expense => {
+      const key = `${expense.year}-${expense.month}`
+      if (!totals[key]) {
+        totals[key] = { expenses: 0, revenues: 0, netProfit: 0 }
+      }
+      totals[key].expenses += expense.amount
+    })
+
+    // Calculate revenue totals
+    revenues.forEach(revenue => {
+      const key = `${revenue.year}-${revenue.month}`
+      if (!totals[key]) {
+        totals[key] = { expenses: 0, revenues: 0, netProfit: 0 }
+      }
+      totals[key].revenues += revenue.amount
+    })
+
+    // Calculate net profit
+    Object.keys(totals).forEach(key => {
+      totals[key].netProfit = totals[key].revenues - totals[key].expenses
+    })
+
+    return totals
+  }, [expenses, revenues])
 
   // Add Expense Type
   const handleAddExpenseType = () => {
@@ -198,6 +228,35 @@ export default function Dashboard() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Monthly Totals Table */}
+      <section className="mt-8">
+        <h2 className="text-2xl font-semibold mb-4">Monthly Financial Summary</h2>
+        <table className="w-full border-collapse border">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border p-2">Year-Month</th>
+              <th className="border p-2">Total Expenses</th>
+              <th className="border p-2">Total Revenues</th>
+              <th className="border p-2">Net Profit</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(monthlyTotals).map(([key, total]) => (
+              <tr key={key}>
+                <td className="border p-2">{key}</td>
+                <td className="border p-2">${total.expenses.toFixed(2)}</td>
+                <td className="border p-2">${total.revenues.toFixed(2)}</td>
+                <td className={`border p-2 ${
+                  total.netProfit >= 0 ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  ${total.netProfit.toFixed(2)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
 
       {/* Expenses List */}
       <section className="mt-8">
