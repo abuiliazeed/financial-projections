@@ -1,127 +1,253 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
-const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June', 
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
+export default function Dashboard() {
+  // State for expense types
+  const [expenseTypes, setExpenseTypes] = useState<string[]>([])
+  const [newExpenseType, setNewExpenseType] = useState('')
 
-export default function DashboardPage() {
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [projections, setProjections] = useState<{
-    month: string;
-    totalRevenue: number;
-    totalExpenses: number;
-    netProfit: number;
-  }[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  // State for revenue types
+  const [revenueTypes, setRevenueTypes] = useState<string[]>([])
+  const [newRevenueType, setNewRevenueType] = useState('')
 
-  useEffect(() => {
-    fetchFinancialProjections();
-  }, [selectedYear]);
+  // State for expenses
+  const [expenses, setExpenses] = useState<{
+    year: number
+    month: number
+    type: string
+    amount: number
+  }[]>([])
 
-  const fetchFinancialProjections = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/projections?year=${selectedYear}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch projections');
-      }
+  // State for revenues
+  const [revenues, setRevenues] = useState<{
+    year: number
+    month: number
+    type: string
+    amount: number
+  }[]>([])
 
-      const data = await response.json();
-      
-      // Create projections for all months, filling in with zeros if no data
-      const monthlyProjections = MONTHS.map((month, index) => {
-        const monthData = data.find((item: any) => item.month === index + 1);
-        return {
-          month,
-          totalRevenue: monthData ? monthData.totalRevenue : 0,
-          totalExpenses: monthData ? monthData.totalExpenses : 0,
-          netProfit: monthData ? monthData.netProfit : 0
-        };
-      });
-
-      setProjections(monthlyProjections);
-      setLoading(false);
-    } catch (err) {
-      setError('Unable to load financial projections');
-      setLoading(false);
+  // Add Expense Type
+  const handleAddExpenseType = () => {
+    if (newExpenseType && !expenseTypes.includes(newExpenseType)) {
+      setExpenseTypes([...expenseTypes, newExpenseType])
+      setNewExpenseType('')
     }
-  };
+  }
 
-  const handleYearChange = (year: number) => {
-    setSelectedYear(year);
-  };
+  // Add Revenue Type
+  const handleAddRevenueType = () => {
+    if (newRevenueType && !revenueTypes.includes(newRevenueType)) {
+      setRevenueTypes([...revenueTypes, newRevenueType])
+      setNewRevenueType('')
+    }
+  }
+
+  // Add Expense
+  const handleAddExpense = (expense: {
+    year: number
+    month: number
+    type: string
+    amount: number
+  }) => {
+    setExpenses([...expenses, expense])
+  }
+
+  // Add Revenue
+  const handleAddRevenue = (revenue: {
+    year: number
+    month: number
+    type: string
+    amount: number
+  }) => {
+    setRevenues([...revenues, revenue])
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Financial Projections</h1>
-      
-      <div className="mb-6">
-        <label htmlFor="year-select" className="block text-sm font-medium text-gray-700">
-          Select Year
-        </label>
-        <select
-          id="year-select"
-          value={selectedYear}
-          onChange={(e) => handleYearChange(Number(e.target.value))}
-          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-        >
-          {[selectedYear - 1, selectedYear, selectedYear + 1].map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
-      </div>
+    <div className="container mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Financial Dashboard</h1>
 
-      {loading ? (
-        <div className="text-center">Loading...</div>
-      ) : error ? (
-        <div className="text-red-500">{error}</div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Month
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total Revenue
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total Expenses
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Net Profit
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {projections.map((projection) => (
-                <tr key={projection.month}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {projection.month}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-green-600">
-                    ${projection.totalRevenue.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-red-600">
-                    ${projection.totalExpenses.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    ${projection.netProfit.toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Expense Types Management */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-semibold mb-4">Expense Types</h2>
+        <div className="flex space-x-2 mb-4">
+          <Input 
+            placeholder="New Expense Type" 
+            value={newExpenseType}
+            onChange={(e) => setNewExpenseType(e.target.value)}
+          />
+          <Button onClick={handleAddExpenseType}>Add Type</Button>
         </div>
-      )}
+        <div className="grid grid-cols-3 gap-2">
+          {expenseTypes.map((type, index) => (
+            <div key={index} className="bg-gray-100 p-2 rounded flex justify-between items-center">
+              {type}
+              <Button 
+                variant="destructive" 
+                size="sm"
+                onClick={() => setExpenseTypes(expenseTypes.filter(t => t !== type))}
+              >
+                Remove
+              </Button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Revenue Types Management */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-semibold mb-4">Revenue Types</h2>
+        <div className="flex space-x-2 mb-4">
+          <Input 
+            placeholder="New Revenue Type" 
+            value={newRevenueType}
+            onChange={(e) => setNewRevenueType(e.target.value)}
+          />
+          <Button onClick={handleAddRevenueType}>Add Type</Button>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {revenueTypes.map((type, index) => (
+            <div key={index} className="bg-gray-100 p-2 rounded flex justify-between items-center">
+              {type}
+              <Button 
+                variant="destructive" 
+                size="sm"
+                onClick={() => setRevenueTypes(revenueTypes.filter(t => t !== type))}
+              >
+                Remove
+              </Button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Add Expense Modal */}
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button>Add Expense</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Expense</DialogTitle>
+          </DialogHeader>
+          <form className="space-y-4" onSubmit={(e) => {
+            e.preventDefault()
+            const formData = new FormData(e.currentTarget)
+            handleAddExpense({
+              year: Number(formData.get('year')),
+              month: Number(formData.get('month')),
+              type: formData.get('type') as string,
+              amount: Number(formData.get('amount'))
+            })
+          }}>
+            <Select name="type">
+              <SelectTrigger>
+                <SelectValue placeholder="Select Expense Type" />
+              </SelectTrigger>
+              <SelectContent>
+                {expenseTypes.map((type, index) => (
+                  <SelectItem key={index} value={type}>{type}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input type="number" name="year" placeholder="Year" required />
+            <Input type="number" name="month" placeholder="Month (1-12)" min="1" max="12" required />
+            <Input type="number" name="amount" placeholder="Amount" step="0.01" required />
+            <Button type="submit">Save Expense</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Revenue Modal */}
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button>Add Revenue</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Revenue</DialogTitle>
+          </DialogHeader>
+          <form className="space-y-4" onSubmit={(e) => {
+            e.preventDefault()
+            const formData = new FormData(e.currentTarget)
+            handleAddRevenue({
+              year: Number(formData.get('year')),
+              month: Number(formData.get('month')),
+              type: formData.get('type') as string,
+              amount: Number(formData.get('amount'))
+            })
+          }}>
+            <Select name="type">
+              <SelectTrigger>
+                <SelectValue placeholder="Select Revenue Type" />
+              </SelectTrigger>
+              <SelectContent>
+                {revenueTypes.map((type, index) => (
+                  <SelectItem key={index} value={type}>{type}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input type="number" name="year" placeholder="Year" required />
+            <Input type="number" name="month" placeholder="Month (1-12)" min="1" max="12" required />
+            <Input type="number" name="amount" placeholder="Amount" step="0.01" required />
+            <Button type="submit">Save Revenue</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Expenses List */}
+      <section className="mt-8">
+        <h2 className="text-2xl font-semibold mb-4">Expenses</h2>
+        <table className="w-full border-collapse border">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border p-2">Year</th>
+              <th className="border p-2">Month</th>
+              <th className="border p-2">Type</th>
+              <th className="border p-2">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {expenses.map((expense, index) => (
+              <tr key={index}>
+                <td className="border p-2">{expense.year}</td>
+                <td className="border p-2">{expense.month}</td>
+                <td className="border p-2">{expense.type}</td>
+                <td className="border p-2">${expense.amount.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      {/* Revenues List */}
+      <section className="mt-8">
+        <h2 className="text-2xl font-semibold mb-4">Revenues</h2>
+        <table className="w-full border-collapse border">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border p-2">Year</th>
+              <th className="border p-2">Month</th>
+              <th className="border p-2">Type</th>
+              <th className="border p-2">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {revenues.map((revenue, index) => (
+              <tr key={index}>
+                <td className="border p-2">{revenue.year}</td>
+                <td className="border p-2">{revenue.month}</td>
+                <td className="border p-2">{revenue.type}</td>
+                <td className="border p-2">${revenue.amount.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
     </div>
-  );
+  )
 }
